@@ -56,15 +56,17 @@ e2function void explosion(vector pos,number mag)
 	explode:Fire("Explode",0,0)
 end
 
-e2function void explosion(vector pos,number mag,entity attacker)
-	if not self.player:IsAdmin() and allowexplosion != true then return end
-	local explode=ents.Create("env_explosion")
-	explode:SetPos(Vector(pos[1],pos[2],pos[3]))
-	explode:SetOwner(attacker)
+e2function void explosion(vector pos, number mag, entity attacker)
+	if not self.player:IsAdmin() and not allowexplosion then return end
+
+	local explode = ents.Create( "env_explosion" )
+	explode:SetPos( Vector( pos[1], pos[2], pos[3] ) )
+	explode:SetOwner( attacker )
 	explode:Spawn()
-	explode:SetKeyValue("iMagnitude",mag)
-	explode:Fire("Explode",0,0)
+	explode:SetKeyValue( "iMagnitude", mag )
+	explode:Fire( "Explode", 0, 0 )
 end
+
 
 e2function void entity:vehicleWeapon(number enabled)
 	if not IsValid(this) or not this:IsVehicle() then return end
