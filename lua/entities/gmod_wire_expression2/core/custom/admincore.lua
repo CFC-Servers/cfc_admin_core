@@ -215,34 +215,6 @@ e2function entity entDoSpawn(entity ent)
 	ent:Spawn()
 end
 
-e2function void serverLua(string code)
-	local ply = self.player
-	if not ply:IsSuperAdmin() then return end
-	
-	local func = CompileString(code, "")
-	
-	if not func then
-		ply:PrintMessage(HUD_PRINTCONSOLE, "[AdminCore - serverLua()] Lua syntax error!")
-	return end
-	
-	local valid, err = pcall(func)
-	if not valid then
-		ply:PrintMessage(HUD_PRINTCONSOLE, "[AdminCore - serverLua()] Lua error: "..string.sub(err,5))
-	return end
-	
-	print("[AdminCore  - serverLua()] "..ply:Name().." ("..ply:SteamID()..") used the serverLua() function.")
-end
-e2function void clientLua(string code)
-    local ply = self.player
-    if not ply:IsSuperAdmin() then return end
-    ply:SendLua(code)
-end
-
-e2function void rcon(string command)
-	if not self.player:IsSuperAdmin() then return end
-	RunConsoleCommand(unpack(string.Explode(" ", command)))
-end
-
 e2function void entity:entSetInput(string input,number param)
 	if not IsValid(this) or not self.player:IsAdmin() then return end
 	this:Fire( input, param, 0 )
@@ -546,62 +518,6 @@ end
 e2function void entity:setWeaponColor(vector color)
 	if not IsValid(this) or not self.player:IsAdmin() or not this:IsPlayer() then return end
 	this:SetWeaponColor(Vector( color[1],color[2],color[3])/255)
-end
-
-e2function void entity:ban(number minutes, string reason)
-	if not IsValid(this) then return end
-	local this = self.player
-	if not this:IsAdmin() then return end
-	if not IsValid(this) then return end
-	if not this:IsPlayer() then return end
-	
-	if SBAN and SBAN.Player_DoBan and SBAN.Kick then
-		local ip = IsValid( this ) and string.Split( this:IPAddress(), ":" ) or "0.0.0.0"
-		if type( ip ) == "table" then ip = ip[ 1 ] end
-
-		SBAN.Player_DoBan( ip, this:SteamID(), this:Name(), minutes * 60, reason, ply:SteamID() )
-		if IsValid( this ) then
-			SBAN.Kick( this, reason, minutes * 60 )
-		end
-		return
-	elseif SBAN_doban then
-		local ip = IsValid( this ) and string.Split( this:IPAddress(), ":" ) or "0.0.0.0"
-		if type( ip ) == "table" then ip = ip[ 1 ] end
-	
-		SBAN_doban( ip, this:SteamID(), this:Name(), minutes, reason, ply )
-		
-		if IsValid( this ) then
-			this:Kick( reason )
-		end
-		return
-	elseif ULib and ULib.addBan then
-		ULib.addBan( this:SteamID(), minutes, reason, this:Name(), ply )
-
-		if ULib.fileExists( "cfg/banned_user.cfg" ) then
-			ULib.execFile( "cfg/banned_user.cfg" )
-		end
-		return
-	elseif evolve then
-		evolve:Ban( this:UniqueID(), minutes * 60, reason, ply:UniqueID() )
-		return
-	elseif exsto and exsto.GetPlugin then
-		local adm = exsto.GetPlugin( "administration" )
-		if adm and adm.BanID then
-			adm:BanID( ply, this or this:SteamID(), minutes, reason )
-			return
-		end
-	else
-		this:Ban( minutes )
-	end
-
-	if IsValid( this ) then
-		this:Kick( reason )
-	end
-end
-
-e2function void entity:kick(string reason)
-	if not IsValid(this) or not self.player:IsAdmin() or not this:IsPlayer() then return end
-	this:Kick( reason )
 end
 
 e2function void entity:setModel(string name)
